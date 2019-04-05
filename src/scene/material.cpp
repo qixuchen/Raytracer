@@ -2,7 +2,7 @@
 #include "material.h"
 #include "light.h"
 #include <algorithm>
-
+#include <cmath>
 // Apply the phong model to this point on the surface of the object, returning
 // the color of that point.
 vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
@@ -26,12 +26,19 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	// Ia?
 
 	for (list<Light*>::const_iterator light = scene->beginLights(); light != scene->endLights(); light++) {
+		//diffuse
 		vec3f color = (*light)->getColor(intersect);
 		vec3f dir = (*light)->getDirection(intersect);
 		vec3f atten = (*light)->distanceAttenuation(intersect)*(*light)->shadowAttenuation(intersect);
 		vec3f di = atten * color*kd* max(0.0, i.N.dot(dir));
 		c += di;
 
+		//sepcular
+		
+		vec3f ref = dir - 2*dir.dot(i.N)*i.N;//reflection vector
+		vec3f obs = -d;//observe direction
+		vec3f sp = atten * color*ks*max(0.0, pow(ref.dot(obs),shininess));
+		c += sp;
 	}
 	return c;
 }

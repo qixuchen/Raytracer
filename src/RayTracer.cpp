@@ -17,13 +17,13 @@ vec3f RayTracer::trace( Scene *scene, double x, double y )
 {
     ray r( vec3f(0,0,0), vec3f(0,0,0) );
     scene->getCamera()->rayThrough( x,y,r );
-	return traceRay( scene, r, vec3f(1.0,1.0,1.0), 0 ).clamp();
+	return traceRay( scene, r, vec3f(1.0,1.0,1.0), 0 ,true).clamp();
 }
 
 // Do recursive ray tracing!  You'll want to insert a lot of code here
 // (or places called from here) to handle reflection, refraction, etc etc.
 vec3f RayTracer::traceRay( Scene *scene, const ray& r, 
-	const vec3f& thresh, int depth )
+	const vec3f& thresh, int depth , bool air)
 {
 	if (depth >= 3) {//stop recursion
 		return vec3f(0.0, 0.0, 0.0);
@@ -46,10 +46,43 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		const Material& m = i.getMaterial();
 		vec3f color = m.shade(scene, r, i);
 		vec3f pos = r.getPosition() + r.getDirection()*i.t;//intersection position
-		vec3f L = -r.getDirection().normalize();
-		vec3f R = 2 * L.dot(i.N)*i.N-L; // reflection angle
-		ray ref(pos, R);
-		color += prod(traceRay(scene,ref,thresh,depth++),i.getMaterial().kr);
+
+		if (m.kr[0] > 0 || m.kr[1] > 0 || m.kr[2] > 0) {//reflection
+			vec3f L = -r.getDirection().normalize();
+			vec3f R = 2 * L.dot(i.N)*i.N - L; // reflection angle
+			ray ref(pos, R);
+			color += prod(traceRay(scene, ref, thresh, depth+1,air), m.kr);
+		}
+		
+		if (m.kt[0] > 0 || m.kt[1] > 0 || m.kt[2] > 0) {//refraction
+			double Ri, Rr;
+			if (air) {
+				Ri = 1.0;
+				Rr = m.index;
+			}
+			else {
+				Ri = m.index;
+				Rr = 1.0;
+			}
+			vec3f L = -r.getDirection().normalize();
+			double Ni = acos(L.dot(i.N));
+			double sinNi = sin(Ni);
+			if (Ri*sinNi / Rr < 1.0) {//not TIR
+				double Nr = asin(Ri*sinNi / Rr);
+				double cosNi = cos(Ni);
+				double tanNr = tan(Nr);
+				
+				vec3f refraction_sym = L - (1 - (cosNi*tanNr) / (sinNi+RAY_EPSILON))*L.dot(i.N)*i.N;
+				vec3f refraction = -refraction_sym.normalize();
+				ray ref(pos, refraction);
+				vec3f result = traceRay(scene, ref, thresh, depth+1, !air);
+				color += prod(result, m.kt);
+				
+
+			}
+
+		}
+
 		return color;
 	
 	} else {

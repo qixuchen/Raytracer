@@ -35,7 +35,7 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 
 		//sepcular
 		
-		vec3f ref = dir - 2*dir.dot(i.N)*i.N;//reflection vector
+		vec3f ref = 2*dir.dot(i.N)*i.N-dir;//reflection vector
 		vec3f obs = -d;//observe direction
 		vec3f sp = prod(atten ,prod(color,ks))*max(0.0, pow(ref.dot(obs),shininess));
 		c += sp;

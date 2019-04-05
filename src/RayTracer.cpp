@@ -47,9 +47,9 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		vec3f color = m.shade(scene, r, i);
 		vec3f pos = r.getPosition() + r.getDirection()*i.t;//intersection position
 		vec3f L = -r.getDirection().normalize();
-		vec3f R = L - 2 * L.dot(i.N)*i.N; // reflection angle
+		vec3f R = 2 * L.dot(i.N)*i.N-L; // reflection angle
 		ray ref(pos, R);
-		//color += prod(traceRay(scene,ref,vec3f(1.0,1.0,1.0),depth++).clamp(),i.getMaterial().kr);
+		color += prod(traceRay(scene,ref,thresh,depth++),i.getMaterial().kr);
 		return color;
 	
 	} else {

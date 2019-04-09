@@ -170,7 +170,8 @@ int main(int argc, char **argv) {
 			clock_t start, end;
 			start=clock();
 
-			theRayTracer->traceLines(0, g_height);
+			int max_depth = traceUI->getDepth();
+			theRayTracer->traceLines(max_depth, 0, g_height);
 		
 			end=clock();
 

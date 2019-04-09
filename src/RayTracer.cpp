@@ -13,18 +13,22 @@
 // through the projection plane, and out into the scene.  All we do is
 // enter the main ray-tracing method, getting things started by plugging
 // in an initial ray weight of (0.0,0.0,0.0) and an initial recursion depth of 0.
-vec3f RayTracer::trace( Scene *scene, double x, double y )
+vec3f RayTracer::trace( Scene *scene, double x, double y ,int maxdepth)
 {
     ray r( vec3f(0,0,0), vec3f(0,0,0) );
     scene->getCamera()->rayThrough( x,y,r );
-	return traceRay( scene, r, vec3f(1.0,1.0,1.0), 0 ).clamp();
+	return traceRay( scene, r, vec3f(1.0,1.0,1.0), 0 ,true, maxdepth).clamp();
 }
 
 // Do recursive ray tracing!  You'll want to insert a lot of code here
 // (or places called from here) to handle reflection, refraction, etc etc.
 vec3f RayTracer::traceRay( Scene *scene, const ray& r, 
-	const vec3f& thresh, int depth )
+	const vec3f& thresh, int depth , bool air,int max_depth)
 {
+	if (depth >= max_depth+1) {//stop recursion
+		return vec3f(0.0, 0.0, 0.0);
+	}
+
 	isect i;
 
 	if( scene->intersect( r, i ) ) {
@@ -40,7 +44,46 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// rays.
 
 		const Material& m = i.getMaterial();
-		return m.shade(scene, r, i);
+		vec3f color = m.shade(scene, r, i);
+		vec3f pos = r.getPosition() + r.getDirection()*i.t;//intersection position
+		
+		if (m.kr[0] > 0 || m.kr[1] > 0 || m.kr[2] > 0) {//reflection
+			vec3f L = -r.getDirection().normalize();
+			vec3f R = 2 * L.dot(i.N)*i.N - L; // reflection angle
+			ray ref(pos, R);
+			color += prod(traceRay(scene, ref, thresh, depth+1,air,max_depth), m.kr);
+		}
+		
+		if (m.kt[0] > 0 || m.kt[1] > 0 || m.kt[2] > 0) {//refraction
+			double Ri, Rr;
+			if (air) {
+				Ri = 1.0;
+				Rr = m.index;
+			}
+			else {
+				Ri = m.index;
+				Rr = 1.0;
+			}
+			vec3f L = -r.getDirection().normalize();
+			double Ni = acos(L.dot(i.N));
+			double sinNi = sin(Ni);
+			if (Ri*sinNi / Rr < 1.0) {//not TIR
+				double Nr = asin(Ri*sinNi / Rr);
+				double cosNi = cos(Ni);
+				double tanNr = tan(Nr);
+				
+				vec3f refraction_sym = L - (1 - (cosNi*tanNr) / (sinNi+RAY_EPSILON))*L.dot(i.N)*i.N;
+				vec3f refraction = -refraction_sym.normalize();
+				ray ref(pos, refraction);
+				vec3f result = traceRay(scene, ref, thresh, depth+1, !air,max_depth);
+				color += prod(result, m.kt);
+				
+
+			}
+
+		}
+		
+		return color;
 	
 	} else {
 		// No intersection.  This ray travels to infinity, so we color
@@ -129,7 +172,7 @@ void RayTracer::traceSetup( int w, int h )
 	memset( buffer, 0, w*h*3 );
 }
 
-void RayTracer::traceLines( int start, int stop )
+void RayTracer::traceLines(int max_depth, int start, int stop)
 {
 	vec3f col;
 	if( !scene )
@@ -140,10 +183,10 @@ void RayTracer::traceLines( int start, int stop )
 
 	for( int j = start; j < stop; ++j )
 		for( int i = 0; i < buffer_width; ++i )
-			tracePixel(i,j);
+			tracePixel(i,j,max_depth);
 }
 
-void RayTracer::tracePixel( int i, int j )
+void RayTracer::tracePixel( int i, int j ,int max_depth)
 {
 	vec3f col;
 
@@ -153,7 +196,7 @@ void RayTracer::tracePixel( int i, int j )
 	double x = double(i)/double(buffer_width);
 	double y = double(j)/double(buffer_height);
 
-	col = trace( scene,x,y );
+	col = trace( scene,x,y ,max_depth);
 
 	unsigned char *pixel = buffer + ( i + j * buffer_width ) * 3;
 

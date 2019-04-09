@@ -23,7 +23,10 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	vec3f p = r.getPosition();
 	vec3f d = r.getDirection();
 	vec3f intersect = p + i.t*d;
-	// Ia?
+	
+	//ambient
+	//c += prod(vec3f(1.0, 1.0, 1.0), vec3f(1.0, 1.0, 1.0));
+	c += prod(ka, scene->getAmibient());
 
 	for (list<Light*>::const_iterator light = scene->beginLights(); light != scene->endLights(); light++) {
 		//diffuse
@@ -31,6 +34,7 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 		vec3f dir = (*light)->getDirection(intersect);
 		vec3f atten = (*light)->distanceAttenuation(intersect)*(*light)->shadowAttenuation(intersect);
 		vec3f di = prod(atten ,prod( color,kd))* max(0.0, i.N.dot(dir));
+		
 		c += di;
 
 		//sepcular

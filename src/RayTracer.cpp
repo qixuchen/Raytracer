@@ -63,7 +63,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 			else {
 				Ri = m.index;
 				Rr = 1.0;
-
+				i.N = -i.N;
 			}
 			vec3f L = -r.getDirection().normalize();
 			double Ni = acos(L.dot(i.N));
@@ -73,7 +73,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 				double cosNi = cos(Ni);
 				double tanNr = tan(Nr);
 				
-				vec3f refraction_sym = L - (1 - (cosNi*tanNr) / (sinNi+RAY_EPSILON))*L.dot(i.N)*i.N;
+				vec3f refraction_sym = L - (1 - (cosNi*tanNr) / (sinNi+RAY_EPSILON))*(L-L.dot(i.N)*i.N);
 				vec3f refraction = -refraction_sym.normalize();
 				ray ref(pos, refraction);
 				vec3f result = traceRay(scene, ref, thresh, depth+1, !air,max_depth);

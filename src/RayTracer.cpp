@@ -63,6 +63,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 			else {
 				Ri = m.index;
 				Rr = 1.0;
+
 			}
 			vec3f L = -r.getDirection().normalize();
 			double Ni = acos(L.dot(i.N));

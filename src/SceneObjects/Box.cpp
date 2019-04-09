@@ -190,10 +190,7 @@ bool Box::intersectLocal( const ray& r, isect& i ) const
 		return false;
 	}
 
-	//flip the normal if inside the box
-	if (i.N*r.getDirection() > 0) {
-		i.N = -i.N;
-	}
+
 
 	i.obj = this;
 	i.t = intersect;

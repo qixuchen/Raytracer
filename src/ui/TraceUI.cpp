@@ -142,7 +142,7 @@ void TraceUI::cb_render(Fl_Widget* o, void* v)
 					}
 				}
 
-				pUI->raytracer->tracePixel( x, y );
+				pUI->raytracer->tracePixel( x, y, pUI->getDepth() );
 		
 			}
 			if (done) break;

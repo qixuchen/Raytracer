@@ -26,14 +26,15 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	
 	//ambient
 	//c += prod(vec3f(1.0, 1.0, 1.0), vec3f(1.0, 1.0, 1.0));
-	c += prod(ka, scene->getAmibient());
+
+	c += prod(prod(ka, scene->getAmibient()), (vec3f(1, 1, 1) - kt));
 
 	for (list<Light*>::const_iterator light = scene->beginLights(); light != scene->endLights(); light++) {
 		//diffuse
 		vec3f color = (*light)->getColor(intersect);
 		vec3f dir = (*light)->getDirection(intersect);
 		vec3f atten = (*light)->distanceAttenuation(intersect)*(*light)->shadowAttenuation(intersect);
-		vec3f di = prod(atten ,prod( color,kd))* max(0.0, i.N.dot(dir));
+		vec3f di = prod(prod(atten ,prod( color,kd))* max(0.0, i.N.dot(dir)), (vec3f(1, 1, 1) - kt));
 		
 		c += di;
 
@@ -41,7 +42,9 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 		
 		vec3f ref = 2*dir.dot(i.N)*i.N-dir;//reflection vector
 		vec3f obs = -d;//observe direction
-		vec3f sp = prod(atten ,prod(color,ks))*max(0.0, pow(ref.dot(obs),shininess));
+
+		//Change by Arceus: multiply the shininess by 128?
+		vec3f sp = prod(atten ,prod(color,ks))*max(0.0, pow(ref.dot(obs),shininess * 128));
 		c += sp;
 	}
 	return c;

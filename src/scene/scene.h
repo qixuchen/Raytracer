@@ -251,7 +251,11 @@ public:
 
 public:
 	Scene() 
-		: transformRoot(), objects(), lights() {}
+		: transformRoot(), objects(), lights() {
+		ambient[0] = 1;
+		ambient[1] = 1;
+		ambient[2] = 1;
+	}
 	virtual ~Scene();
 
 	void add( Geometry* obj )
@@ -260,13 +264,25 @@ public:
 		objects.push_back( obj );
 	}
 	void add( Light* light )
-	{ lights.push_back( light ); }
+	{ 
+		lights.push_back( light ); 
+	}
 	void setAmbient(vec3f a) {
-		ambient = a;
+		prev_ambient = a;
+		ambient = prev_ambient;
 	}
 	vec3f getAmibient() {
 		return ambient;
 	}
+
+	// Change ambient
+	void changeDegreeOfAmbient(double deg) {
+		ambient = prev_ambient * deg;
+	}
+
+	void setConstAttenCoeff(double const_coeff);
+	void setLinearAttenCoeff(double const_coeff);
+	void setQuadraticAttenCoeff(double const_coeff);
 
 	bool intersect( const ray& r, isect& i ) const;
 	void initScene();
@@ -284,6 +300,7 @@ private:
 	list<Geometry*> boundedobjects;
     list<Light*> lights;
     Camera camera;
+	vec3f prev_ambient;
 	vec3f ambient;
 	
 	// Each object in the scene, provided that it has hasBoundingBoxCapability(),

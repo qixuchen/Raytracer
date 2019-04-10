@@ -17,15 +17,15 @@ vec3f RayTracer::trace( Scene *scene, double x, double y ,int maxdepth)
 {
     ray r( vec3f(0,0,0), vec3f(0,0,0) );
     scene->getCamera()->rayThrough( x,y,r );
-	return traceRay( scene, r, vec3f(1.0,1.0,1.0), 0 ,true, maxdepth).clamp();
+	return traceRay( scene, r, vec3f(1.0,1.0,1.0), 0 ,true, maxdepth, 1).clamp();
 }
 
 // Do recursive ray tracing!  You'll want to insert a lot of code here
 // (or places called from here) to handle reflection, refraction, etc etc.
 vec3f RayTracer::traceRay( Scene *scene, const ray& r, 
-	const vec3f& thresh, int depth , bool air,int max_depth)
+	const vec3f& thresh, int depth , bool air,int max_depth, double curIntensity)
 {
-	if (depth >= max_depth+1) {//stop recursion
+	if (depth >= max_depth+1 || curIntensity < minIntensity) {//stop recursion
 		return vec3f(0.0, 0.0, 0.0);
 	}
 
@@ -51,7 +51,14 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 			vec3f L = -r.getDirection().normalize();
 			vec3f R = 2 * L.dot(i.N)*i.N - L; // reflection angle
 			ray ref(pos, R);
-			color += prod(traceRay(scene, ref, thresh, depth+1,air,max_depth), m.kr);
+			double intensity = curIntensity * (m.kr[0] + m.kr[1] + m.kr[2]) / 3;
+			isect nextStep;
+			if (scene->intersect(ref, nextStep)) {
+				vec3f nextPoint = ref.at(nextStep.t);
+				double distance = (pos - nextPoint).length();
+				intensity /= pow(distance, 2);
+			}
+			color += prod(traceRay(scene, ref, thresh, depth+1,air, max_depth, intensity), m.kr);
 		}
 		
 		if (m.kt[0] > 0 || m.kt[1] > 0 || m.kt[2] > 0) {//refraction
@@ -76,7 +83,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 				vec3f refraction_sym = L - (1 - (cosNi*tanNr) / (sinNi+RAY_EPSILON))*(L-L.dot(i.N)*i.N);
 				vec3f refraction = -refraction_sym.normalize();
 				ray ref(pos, refraction);
-				vec3f result = traceRay(scene, ref, thresh, depth+1, !air,max_depth);
+				vec3f result = traceRay(scene, ref, thresh, depth+1, !air,max_depth, curIntensity * (m.kt[0]+m.kt[1]+m.kt[2])/3);
 				color += prod(result, m.kt);
 				
 
@@ -102,6 +109,7 @@ RayTracer::RayTracer()
 	scene = NULL;
 
 	m_bSceneLoaded = false;
+	minIntensity = 0;
 }
 
 

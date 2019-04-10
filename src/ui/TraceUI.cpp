@@ -87,9 +87,38 @@ void TraceUI::cb_sizeSlides(Fl_Widget* o, void* v)
 	pUI->m_traceGlWindow->resizeWindow( pUI->m_nSize, height );
 }
 
+void TraceUI::cb_ambientSlides(Fl_Widget* o, void* v)
+{
+	TraceUI* pUI = (TraceUI*)(o->user_data());
+
+	pUI->raytracer->changeAmbient(double (((Fl_Slider *)o)->value()));
+}
+
 void TraceUI::cb_depthSlides(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->m_nDepth=int( ((Fl_Slider *)o)->value() ) ;
+}
+
+void TraceUI::cb_constAttenSlides(Fl_Widget* o, void* v)
+{
+	TraceUI* pUI = (TraceUI*)(o->user_data());
+	pUI->raytracer->setConstAttenCoeff(double(((Fl_Slider *)o)->value()));
+}
+void TraceUI::cb_linearAttenSlides(Fl_Widget* o, void* v)
+{
+	TraceUI* pUI = (TraceUI*)(o->user_data());
+	pUI->raytracer->setLinearAttenCoeff(double(((Fl_Slider *)o)->value()));
+}
+void TraceUI::cb_quadraticAttenSlides(Fl_Widget* o, void* v)
+{
+	TraceUI* pUI = (TraceUI*)(o->user_data());
+	pUI->raytracer->setQuadraticAttenCoeff(double(((Fl_Slider *)o)->value()));
+}
+
+void TraceUI::cb_minIntensitySlides(Fl_Widget* o, void* v)
+{
+	TraceUI* pUI = (TraceUI*)(o->user_data());
+	pUI->raytracer->setMinIntensity(double(((Fl_Slider *)o)->value()));
 }
 
 void TraceUI::cb_render(Fl_Widget* o, void* v)
@@ -214,7 +243,7 @@ TraceUI::TraceUI() {
 	// init.
 	m_nDepth = 0;
 	m_nSize = 150;
-	m_mainWindow = new Fl_Window(100, 40, 320, 100, "Ray <Not Loaded>");
+	m_mainWindow = new Fl_Window(100, 40, 320, 210, "Ray <Not Loaded>");
 		m_mainWindow->user_data((void*)(this));	// record self to be used by static callback functions
 		// install menu bar
 		m_menubar = new Fl_Menu_Bar(0, 0, 320, 25);
@@ -245,6 +274,71 @@ TraceUI::TraceUI() {
 		m_sizeSlider->value(m_nSize);
 		m_sizeSlider->align(FL_ALIGN_RIGHT);
 		m_sizeSlider->callback(cb_sizeSlides);
+
+		// install slider ambient
+		m_sizeSlider = new Fl_Value_Slider(10, 80, 180, 20, "Ambient");
+		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
+		m_sizeSlider->labelfont(FL_COURIER);
+		m_sizeSlider->labelsize(12);
+		m_sizeSlider->minimum(0);
+		m_sizeSlider->maximum(1);
+		m_sizeSlider->step(0.01);
+		m_sizeSlider->value(1);
+		m_sizeSlider->align(FL_ALIGN_RIGHT);
+		m_sizeSlider->callback(cb_ambientSlides);
+
+		// install slider const atten
+		m_sizeSlider = new Fl_Value_Slider(10, 105, 180, 20, "Const Attenuation");
+		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
+		m_sizeSlider->labelfont(FL_COURIER);
+		m_sizeSlider->labelsize(12);
+		m_sizeSlider->minimum(0);
+		m_sizeSlider->maximum(1);
+		m_sizeSlider->step(0.01);
+		m_sizeSlider->value(0.25);
+		m_sizeSlider->align(FL_ALIGN_RIGHT);
+		m_sizeSlider->callback(cb_constAttenSlides);
+
+		// install slider linear atten
+		m_sizeSlider = new Fl_Value_Slider(10, 130, 180, 20, "Linear Attenuation");
+		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
+		m_sizeSlider->labelfont(FL_COURIER);
+		m_sizeSlider->labelsize(12);
+		m_sizeSlider->minimum(0);
+		m_sizeSlider->maximum(1);
+		m_sizeSlider->step(0.01);
+		m_sizeSlider->value(0.25);
+		m_sizeSlider->align(FL_ALIGN_RIGHT);
+		m_sizeSlider->callback(cb_linearAttenSlides);
+
+		// install slider quadratic atten
+		m_sizeSlider = new Fl_Value_Slider(10, 155, 180, 20, "Quadratic Attenuation");
+		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
+		m_sizeSlider->labelfont(FL_COURIER);
+		m_sizeSlider->labelsize(12);
+		m_sizeSlider->minimum(0);
+		m_sizeSlider->maximum(1);
+		m_sizeSlider->step(0.01);
+		m_sizeSlider->value(0.5);
+		m_sizeSlider->align(FL_ALIGN_RIGHT);
+		m_sizeSlider->callback(cb_quadraticAttenSlides);
+
+		// install slider min intensity
+		m_sizeSlider = new Fl_Value_Slider(10, 180, 180, 20, "Threshold");
+		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
+		m_sizeSlider->labelfont(FL_COURIER);
+		m_sizeSlider->labelsize(12);
+		m_sizeSlider->minimum(0);
+		m_sizeSlider->maximum(1);
+		m_sizeSlider->step(0.01);
+		m_sizeSlider->value(0);
+		m_sizeSlider->align(FL_ALIGN_RIGHT);
+		m_sizeSlider->callback(cb_minIntensitySlides);
 
 		m_renderButton = new Fl_Button(240, 27, 70, 25, "&Render");
 		m_renderButton->user_data((void*)(this));

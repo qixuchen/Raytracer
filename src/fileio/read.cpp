@@ -528,10 +528,30 @@ static void processObject( Obj *obj, Scene *scene, mmap& materials )
 		if( child == NULL ) {
 			throw ParseError( "No info for point_light" );
 		}
+		// Testing for atten.
+		double const_coeff = 0.25;
+		double linear_coeff = 0.25;
+		double quadratic_coeff = 0.5;
+		if (hasField(child, "constant_attenuation_coeff")) {
+			const_coeff = getField(child, "constant_attenuation_coeff")->getScalar();
+		}
 
-		scene->add( new PointLight( scene, 
-			tupleToVec( getField( child, "position" ) ),
-			tupleToVec( getColorField( child ) ) ) );
+		if (hasField(child, "linear_attenuation_coeff")) {
+			linear_coeff = getField(child, "linear_attenuation_coeff")->getScalar();
+		}
+
+		if (hasField(child, "quadratic_attenuation_coeff")) {
+			quadratic_coeff = getField(child, "quadratic_attenuation_coeff")->getScalar();
+		}
+
+		PointLight* pl = new PointLight(scene,
+			tupleToVec(getField(child, "position")),
+			tupleToVec(getColorField(child)));
+		pl->set_const_coeff(const_coeff);
+		pl->set_linear_coeff(linear_coeff);
+		pl->set_quadratic_coeff(quadratic_coeff);
+
+		scene->add( pl );
 	} else if( 	name == "sphere" ||
 				name == "box" ||
 				name == "cylinder" ||

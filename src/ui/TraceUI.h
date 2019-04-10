@@ -62,6 +62,11 @@ private:
 
 	static void cb_sizeSlides(Fl_Widget* o, void* v);
 	static void cb_depthSlides(Fl_Widget* o, void* v);
+	static void cb_ambientSlides(Fl_Widget* o, void* v);
+	static void cb_constAttenSlides(Fl_Widget* o, void* v);
+	static void cb_linearAttenSlides(Fl_Widget* o, void* v);
+	static void cb_quadraticAttenSlides(Fl_Widget* o, void* v);
+	static void cb_minIntensitySlides(Fl_Widget* o, void* v);
 
 	static void cb_render(Fl_Widget* o, void* v);
 	static void cb_stop(Fl_Widget* o, void* v);

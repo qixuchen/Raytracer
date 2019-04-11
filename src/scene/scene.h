@@ -252,9 +252,6 @@ public:
 public:
 	Scene() 
 		: transformRoot(), objects(), lights() {
-		ambient[0] = 1;
-		ambient[1] = 1;
-		ambient[2] = 1;
 	}
 	virtual ~Scene();
 

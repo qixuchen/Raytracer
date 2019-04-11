@@ -204,7 +204,7 @@ void RayTracer::tracePixel( int i, int j ,int max_depth)
 
 	if( !scene )
 		return;
-	/*
+
 	i -= superSample / 2;
 	j -= superSample / 2;
 	int tempj = j;
@@ -221,6 +221,7 @@ void RayTracer::tracePixel( int i, int j ,int max_depth)
 
 			col += trace(scene, x, y, max_depth);
 			valid++;
+			j++;
 		}
 		i++;
 		j = tempj;
@@ -230,11 +231,6 @@ void RayTracer::tracePixel( int i, int j ,int max_depth)
 	i = previ;
 	j = prevj;
 	
-	*/
-	double x = double(i) / double(buffer_width);
-	double y = double(j) / double(buffer_height);
-
-	col += trace(scene, x, y, max_depth);
 	unsigned char *pixel = buffer + ( i + j * buffer_width ) * 3;
 
 	pixel[0] = (int)( 255.0 * col[0]);

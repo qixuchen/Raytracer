@@ -249,10 +249,10 @@ TraceUI::TraceUI() {
 	// init.
 	m_nDepth = 0;
 	m_nSize = 150;
-	m_mainWindow = new Fl_Window(100, 40, 340, 235, "Ray <Not Loaded>");
+	m_mainWindow = new Fl_Window(100, 40, 360, 235, "Ray <Not Loaded>");
 		m_mainWindow->user_data((void*)(this));	// record self to be used by static callback functions
 		// install menu bar
-		m_menubar = new Fl_Menu_Bar(0, 0, 320, 25);
+		m_menubar = new Fl_Menu_Bar(0, 0, 360, 25);
 		m_menubar->menu(menuitems);
 
 		// install slider depth
@@ -359,11 +359,11 @@ TraceUI::TraceUI() {
 		m_sizeSlider->align(FL_ALIGN_RIGHT);
 		m_sizeSlider->callback(cb_superResSlides);
 
-		m_renderButton = new Fl_Button(240, 27, 70, 25, "&Render");
+		m_renderButton = new Fl_Button(260, 27, 70, 25, "&Render");
 		m_renderButton->user_data((void*)(this));
 		m_renderButton->callback(cb_render);
 
-		m_stopButton = new Fl_Button(240, 55, 70, 25, "&Stop");
+		m_stopButton = new Fl_Button(260, 55, 70, 25, "&Stop");
 		m_stopButton->user_data((void*)(this));
 		m_stopButton->callback(cb_stop);
 

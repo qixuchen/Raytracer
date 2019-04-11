@@ -39,6 +39,10 @@ public:
 		minIntensity = min;
 	}
 
+	void setSuperRes(int res) {
+		superSample = res;
+	}
+
 	bool loadScene( char* fn );
 
 	bool sceneLoaded();
@@ -47,6 +51,7 @@ private:
 	unsigned char *buffer;
 	int buffer_width, buffer_height;
 	int bufferSize;
+	int superSample;
 	Scene *scene;
 
 	bool m_bSceneLoaded;

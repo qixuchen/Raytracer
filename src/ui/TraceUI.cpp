@@ -121,6 +121,12 @@ void TraceUI::cb_minIntensitySlides(Fl_Widget* o, void* v)
 	pUI->raytracer->setMinIntensity(double(((Fl_Slider *)o)->value()));
 }
 
+void TraceUI::cb_superResSlides(Fl_Widget* o, void* v)
+{
+	TraceUI* pUI = (TraceUI*)(o->user_data());
+	pUI->raytracer->setSuperRes(int(((Fl_Slider *)o)->value()));
+}
+
 void TraceUI::cb_render(Fl_Widget* o, void* v)
 {
 	char buffer[256];
@@ -243,7 +249,7 @@ TraceUI::TraceUI() {
 	// init.
 	m_nDepth = 0;
 	m_nSize = 150;
-	m_mainWindow = new Fl_Window(100, 40, 320, 210, "Ray <Not Loaded>");
+	m_mainWindow = new Fl_Window(100, 40, 340, 235, "Ray <Not Loaded>");
 		m_mainWindow->user_data((void*)(this));	// record self to be used by static callback functions
 		// install menu bar
 		m_menubar = new Fl_Menu_Bar(0, 0, 320, 25);
@@ -328,7 +334,7 @@ TraceUI::TraceUI() {
 		m_sizeSlider->callback(cb_quadraticAttenSlides);
 
 		// install slider min intensity
-		m_sizeSlider = new Fl_Value_Slider(10, 180, 180, 20, "Threshold");
+		m_sizeSlider = new Fl_Value_Slider(10, 180, 200, 20, "Threshold");
 		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
 		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
 		m_sizeSlider->labelfont(FL_COURIER);
@@ -339,6 +345,19 @@ TraceUI::TraceUI() {
 		m_sizeSlider->value(0);
 		m_sizeSlider->align(FL_ALIGN_RIGHT);
 		m_sizeSlider->callback(cb_minIntensitySlides);
+
+		// install slider super resolution
+		m_sizeSlider = new Fl_Value_Slider(10, 205, 200, 20, "Antialiasing");
+		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
+		m_sizeSlider->labelfont(FL_COURIER);
+		m_sizeSlider->labelsize(12);
+		m_sizeSlider->minimum(1);
+		m_sizeSlider->maximum(5);
+		m_sizeSlider->step(1);
+		m_sizeSlider->value(1);
+		m_sizeSlider->align(FL_ALIGN_RIGHT);
+		m_sizeSlider->callback(cb_superResSlides);
 
 		m_renderButton = new Fl_Button(240, 27, 70, 25, "&Render");
 		m_renderButton->user_data((void*)(this));

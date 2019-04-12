@@ -272,7 +272,7 @@ public:
 		prev_ambient = a;
 		ambient = prev_ambient;
 	}
-	vec3f getAmibient() {
+	vec3f getAmbient() {
 		return ambient;
 	}
 

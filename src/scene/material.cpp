@@ -27,7 +27,7 @@ vec3f Material::shade( Scene *scene, const ray& r, const isect& i ) const
 	//ambient
 	//c += prod(vec3f(1.0, 1.0, 1.0), vec3f(1.0, 1.0, 1.0));
 
-	c += prod(prod(ka, scene->getAmibient()), (vec3f(1, 1, 1) - kt));
+	c += prod(prod(ka, scene->getAmbient()), (vec3f(1, 1, 1) - kt));
 
 	for (list<Light*>::const_iterator light = scene->beginLights(); light != scene->endLights(); light++) {
 		//diffuse

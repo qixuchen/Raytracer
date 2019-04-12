@@ -28,6 +28,12 @@ public:
 
 	Fl_Slider*			m_sizeSlider;
 	Fl_Slider*			m_depthSlider;
+	Fl_Slider*			m_ambientSlider;
+	Fl_Slider*			m_constAttenSlider;
+	Fl_Slider*			m_linearAttenSlider;
+	Fl_Slider*			m_quadraticAttenSlider;
+	Fl_Slider*			m_thresholdSlider;
+	Fl_Slider*			m_antialiasingSlider;
 
 	Fl_Button*			m_renderButton;
 	Fl_Button*			m_stopButton;

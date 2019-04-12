@@ -251,7 +251,7 @@ public:
 
 public:
 	Scene() 
-		: transformRoot(), objects(), lights() {
+		: transformRoot(), objects(), lights() ,const_atten(0.25), linear_atten(0.25), quadratic_atten(0.5){
 	}
 	virtual ~Scene();
 
@@ -260,8 +260,12 @@ public:
 		obj->ComputeBoundingBox();
 		objects.push_back( obj );
 	}
-	void add( Light* light )
+	void add( Light* light, double const_coeff=0.25, double linear_coeff=0.25, double quadratic_coeff=0.5)
 	{ 
+		const_atten = (const_atten < const_coeff ? const_atten : const_coeff);
+		linear_atten = (linear_atten < linear_coeff ? linear_atten : linear_coeff);
+		quadratic_atten = (quadratic_atten < quadratic_coeff ? quadratic_atten : quadratic_coeff);
+
 		lights.push_back( light ); 
 	}
 	void setAmbient(vec3f a) {
@@ -281,6 +285,16 @@ public:
 	void setLinearAttenCoeff(double const_coeff);
 	void setQuadraticAttenCoeff(double const_coeff);
 
+	double getConstAttenCoeff() {
+		return const_atten;
+	}
+	double getLinearAttenCoeff() {
+		return linear_atten;
+	}
+	double getQuadraticAttenCoeff() {
+		return quadratic_atten;
+	}
+
 	bool intersect( const ray& r, isect& i ) const;
 	void initScene();
 
@@ -299,6 +313,9 @@ private:
     Camera camera;
 	vec3f prev_ambient;
 	vec3f ambient;
+	double const_atten;
+	double linear_atten;
+	double quadratic_atten;
 	
 	// Each object in the scene, provided that it has hasBoundingBoxCapability(),
 	// must fall within this bounding box.  Objects that don't have hasBoundingBoxCapability()

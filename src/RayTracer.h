@@ -47,6 +47,16 @@ public:
 
 	bool sceneLoaded();
 
+	double getConstAtten() {
+		return scene->getConstAttenCoeff();
+	}
+	double getLinearAtten() {
+		return scene->getLinearAttenCoeff();
+	}
+	double getQuadraticAtten() {
+		return scene->getQuadraticAttenCoeff();
+	}
+
 private:
 	unsigned char *buffer;
 	int buffer_width, buffer_height;

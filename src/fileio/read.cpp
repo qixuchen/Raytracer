@@ -551,7 +551,7 @@ static void processObject( Obj *obj, Scene *scene, mmap& materials )
 		pl->set_linear_coeff(linear_coeff);
 		pl->set_quadratic_coeff(quadratic_coeff);
 
-		scene->add( pl );
+		scene->add( pl , const_coeff, linear_coeff, quadratic_coeff);
 	} else if( 	name == "sphere" ||
 				name == "box" ||
 				name == "cylinder" ||

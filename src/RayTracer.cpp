@@ -17,15 +17,15 @@ vec3f RayTracer::trace( Scene *scene, double x, double y ,int maxdepth)
 {
     ray r( vec3f(0,0,0), vec3f(0,0,0) );
     scene->getCamera()->rayThrough( x,y,r );
-	return traceRay( scene, r, vec3f(1.0,1.0,1.0), 0 ,true, maxdepth).clamp();
+	return traceRay( scene, r, vec3f(1.0,1.0,1.0), 0 ,true, maxdepth, 1).clamp();
 }
 
 // Do recursive ray tracing!  You'll want to insert a lot of code here
 // (or places called from here) to handle reflection, refraction, etc etc.
 vec3f RayTracer::traceRay( Scene *scene, const ray& r, 
-	const vec3f& thresh, int depth , bool air,int max_depth)
+	const vec3f& thresh, int depth , bool air,int max_depth, double curIntensity)
 {
-	if (depth >= max_depth+1) {//stop recursion
+	if (depth >= max_depth+1 || curIntensity < minIntensity) {//stop recursion
 		return vec3f(0.0, 0.0, 0.0);
 	}
 
@@ -51,7 +51,14 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 			vec3f L = -r.getDirection().normalize();
 			vec3f R = 2 * L.dot(i.N)*i.N - L; // reflection angle
 			ray ref(pos, R);
-			color += prod(traceRay(scene, ref, thresh, depth+1,air,max_depth), m.kr);
+			double intensity = curIntensity * (m.kr[0] + m.kr[1] + m.kr[2]) / 3;
+			isect nextStep;
+			if (scene->intersect(ref, nextStep)) {
+				vec3f nextPoint = ref.at(nextStep.t);
+				double distance = (pos - nextPoint).length();
+				intensity /= pow(distance, 2);
+			}
+			color += prod(traceRay(scene, ref, thresh, depth+1,air, max_depth, intensity), m.kr);
 		}
 		
 		if (m.kt[0] > 0 || m.kt[1] > 0 || m.kt[2] > 0) {//refraction
@@ -76,7 +83,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 				vec3f refraction_sym = L - (1 - (cosNi*tanNr) / (sinNi+RAY_EPSILON))*(L-L.dot(i.N)*i.N);
 				vec3f refraction = -refraction_sym.normalize();
 				ray ref(pos, refraction);
-				vec3f result = traceRay(scene, ref, thresh, depth+1, !air,max_depth);
+				vec3f result = traceRay(scene, ref, thresh, depth+1, !air,max_depth, curIntensity * (m.kt[0]+m.kt[1]+m.kt[2])/3);
 				color += prod(result, m.kt);
 				
 
@@ -102,6 +109,8 @@ RayTracer::RayTracer()
 	scene = NULL;
 
 	m_bSceneLoaded = false;
+	minIntensity = 0;
+	superSample = 1;
 }
 
 
@@ -190,15 +199,38 @@ void RayTracer::traceLines(int max_depth, int start, int stop)
 void RayTracer::tracePixel( int i, int j ,int max_depth)
 {
 	vec3f col;
+	int previ = i;
+	int prevj = j;
 
 	if( !scene )
 		return;
 
-	double x = double(i)/double(buffer_width);
-	double y = double(j)/double(buffer_height);
+	i -= superSample / 2;
+	j -= superSample / 2;
+	int tempj = j;
+	int valid = 0;
 
-	col = trace( scene,x,y ,max_depth);
+	for (int index = 0; index < this->superSample; index++) {
+		for (int index2 = 0; index2 < this->superSample; index2++) {
+			if (i < 0 || j < 0 || i > buffer_width || j > buffer_width) {
+				continue;
+				j++;
+			}
+			double x = double(i) / double(buffer_width);
+			double y = double(j) / double(buffer_height);
 
+			col += trace(scene, x, y, max_depth);
+			valid++;
+			j++;
+		}
+		i++;
+		j = tempj;
+	}
+
+	col /= valid;
+	i = previ;
+	j = prevj;
+	
 	unsigned char *pixel = buffer + ( i + j * buffer_width ) * 3;
 
 	pixel[0] = (int)( 255.0 * col[0]);

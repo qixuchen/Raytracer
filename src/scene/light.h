@@ -11,12 +11,17 @@ public:
 	virtual double distanceAttenuation( const vec3f& P ) const = 0;
 	virtual vec3f getColor( const vec3f& P ) const = 0;
 	virtual vec3f getDirection( const vec3f& P ) const = 0;
-
+	void set_const_coeff(double);
+	void set_linear_coeff(double);
+	void set_quadratic_coeff(double);
 protected:
 	Light( Scene *scene, const vec3f& col )
-		: SceneElement( scene ), color( col ) {}
+		: SceneElement( scene ), color( col ), constant_attenuation_coeff(0.25), linear_attenuation_coeff(0.25), quadratic_attenuation_coeff(0.5) {}
 
 	vec3f 		color;
+	double constant_attenuation_coeff;
+	double linear_attenuation_coeff;
+	double quadratic_attenuation_coeff;
 };
 
 class DirectionalLight
@@ -45,8 +50,11 @@ public:
 	virtual vec3f getColor( const vec3f& P ) const;
 	virtual vec3f getDirection( const vec3f& P ) const;
 
+
+
 protected:
 	vec3f position;
+
 };
 
 #endif // __LIGHT_H__

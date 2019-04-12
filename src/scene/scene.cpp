@@ -199,3 +199,19 @@ void Scene::initScene()
 			nonboundedobjects.push_back(*j);
 	}
 }
+
+void Scene::setConstAttenCoeff(double const_coeff) {
+	for (liter it = lights.begin(); it != lights.end(); it++) {
+		(*it)->set_const_coeff(const_coeff);
+	}
+}
+void Scene::setLinearAttenCoeff(double const_coeff) {
+	for (liter it = lights.begin(); it != lights.end(); it++) {
+		(*it)->set_linear_coeff(const_coeff);
+	}
+}
+void Scene::setQuadraticAttenCoeff(double const_coeff) {
+	for (liter it = lights.begin(); it != lights.end(); it++) {
+		(*it)->set_quadratic_coeff(const_coeff);
+	}
+}

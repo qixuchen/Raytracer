@@ -14,6 +14,15 @@ public:
 	void set_const_coeff(double);
 	void set_linear_coeff(double);
 	void set_quadratic_coeff(double);
+	double get_const_coeff() {
+		return constant_attenuation_coeff;
+	}
+	double get_linear_coeff() {
+		return linear_attenuation_coeff;
+	}
+	double get_quadratic_coeff() {
+		return quadratic_attenuation_coeff;
+	}
 protected:
 	Light( Scene *scene, const vec3f& col )
 		: SceneElement( scene ), color( col ), constant_attenuation_coeff(0.25), linear_attenuation_coeff(0.25), quadratic_attenuation_coeff(0.5) {}
